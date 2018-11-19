@@ -10,7 +10,7 @@ import Foundation
 
 extension Set {
     
-    func member(_ value: Element) -> Element? {
+    public func member(_ value: Element) -> Element? {
         if let index = self.firstIndex(of: value) {
             return self[index]
         } else {

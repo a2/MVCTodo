@@ -10,7 +10,7 @@ import Foundation
 
 extension Collection {
     
-    func sorted<C: Comparable>(by keyPath: KeyPath<Element, C>) -> Array<Element> {
+    public func sorted<C: Comparable>(by keyPath: KeyPath<Element, C>) -> Array<Element> {
         return sorted { (left, right) -> Bool in
             let leftComparable = left[keyPath: keyPath]
             let rightComparable = right[keyPath: keyPath]
@@ -18,7 +18,7 @@ extension Collection {
         }
     }
     
-    func sorted<C1: Comparable, C2: Comparable>(by keyPath1: KeyPath<Element, C1?>, _ keyPath2: KeyPath<Element, C2>) -> Array<Element> {
+    public func sorted<C1: Comparable, C2: Comparable>(by keyPath1: KeyPath<Element, C1?>, _ keyPath2: KeyPath<Element, C2>) -> Array<Element> {
         
         return sorted { (left, right) -> Bool in
             
@@ -44,7 +44,7 @@ extension Collection {
         
     }
     
-    func keyed<H: Hashable>(by keyPath: KeyPath<Element, H>) -> Dictionary<H, Element> {
+    public func keyed<H: Hashable>(by keyPath: KeyPath<Element, H>) -> Dictionary<H, Element> {
         var d = Dictionary<H, Element>()
         for item in self {
             let key = item[keyPath: keyPath]

@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol TDStorageObserver: AnyObject {
+public protocol TDStorageObserver: AnyObject {
     
     func storage(_ storage: TDStorage, addedList: TDItemList)
     func storage(_ storage: TDStorage, updatedList: TDItemList)
@@ -22,24 +22,36 @@ protocol TDStorageObserver: AnyObject {
 
 extension TDStorageObserver {
     
-    func storage(_ storage: TDStorage, addedList: TDItemList) { }
-    func storage(_ storage: TDStorage, updatedList: TDItemList) { }
-    func storage(_ storage: TDStorage, removedList: TDItemList) { }
+    public func storage(_ storage: TDStorage, addedList: TDItemList) { }
+    public func storage(_ storage: TDStorage, updatedList: TDItemList) { }
+    public func storage(_ storage: TDStorage, removedList: TDItemList) { }
     
-    func storage(_ storage: TDStorage, addedItem: TDItem, to list: TDItemList) { }
-    func storage(_ storage: TDStorage, updatedItem: TDItem) { }
-    func storage(_ storage: TDStorage, removedItem: TDItem, from list: TDItemList) { }
+    public func storage(_ storage: TDStorage, addedItem: TDItem, to list: TDItemList) { }
+    public func storage(_ storage: TDStorage, updatedItem: TDItem) { }
+    public func storage(_ storage: TDStorage, removedItem: TDItem, from list: TDItemList) { }
     
 }
 
-class TDStorage {
+public class TDStorage {
     
     private let location: URL
     private var rawModel: TDStorageModel
     
     private var observers = Dictionary<NSObject, TDStorageObserver>()
+
+    private static let groupIdentifier: String = "group.com.example.MVCTodo"
+
+    public static func shared() -> TDStorage? {
+        guard let sharedDirectory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupIdentifier) else {
+            print("Group is unavailable")
+            return nil
+        }
+
+        let storageFile = sharedDirectory.appendingPathComponent("todos.json")
+        return TDStorage(location: storageFile)
+    }
     
-    init(location: URL) {
+    public init(location: URL) {
         print("Loading from \(location.path)")
         self.location = location
         var raw: TDStorageModel?
@@ -69,21 +81,21 @@ class TDStorage {
         observers.values.forEach { of($0) }
     }
     
-    var lists: Array<TDItemList> {
+    public var lists: Array<TDItemList> {
         return Array(rawModel.lists)
     }
     
-    func addListObserver(_ observer: TDStorageObserver) -> NSObject {
+    public func addListObserver(_ observer: TDStorageObserver) -> NSObject {
         let token = NSObject()
         observers[token] = observer
         return token
     }
     
-    func removeListObserver(_ token: NSObject) {
+    public func removeListObserver(_ token: NSObject) {
         observers.removeValue(forKey: token)
     }
     
-    func saveList(_ list: TDItemList) {
+    public func saveList(_ list: TDItemList) {
         if let existing = rawModel.lists.member(list) {
             // check "existing" against "list" to see if things have actually changed
             if existing.emoji != list.emoji || existing.name != list.name {
@@ -100,25 +112,25 @@ class TDStorage {
         }
     }
     
-    func deleteList(_ list: TDItemList) {
+    public func deleteList(_ list: TDItemList) {
         guard rawModel.lists.contains(list) else { return }
         rawModel.lists.remove(list)
         try? saveModel()
         notify { $0.storage(self, removedList: list) }
     }
     
-    func numberOfItems(in list: TDItemList) -> Int {
+    public func numberOfItems(in list: TDItemList) -> Int {
         return rawModel.associations[list.identifier]?.count ?? 0
     }
     
-    func items(in list: TDItemList) -> Set<TDItem> {
+    public func items(in list: TDItemList) -> Set<TDItem> {
         let associations = rawModel.associations[list.identifier] ?? []
         let itemLookup = rawModel.items.keyed(by: \.identifier )
         let items = associations.compactMap { itemLookup[$0] }
         return Set(items)
     }
     
-    func addItem(_ item: TDItem, to list: TDItemList) {
+    public func addItem(_ item: TDItem, to list: TDItemList) {
         var listItems = rawModel.associations[list.identifier] ?? []
         listItems.insert(item.identifier)
         rawModel.associations[list.identifier] = listItems
@@ -128,20 +140,19 @@ class TDStorage {
         notify { $0.storage(self, addedItem: item, to: list) }
     }
     
-    func updateItem(_ item: TDItem) {
+    public func updateItem(_ item: TDItem) {
         rawModel.items.remove(item)
         rawModel.items.insert(item)
         try? saveModel()
         notify { $0.storage(self, updatedItem: item) }
     }
     
-    func removeItem(_ item: TDItem, from list: TDItemList) {
+    public func removeItem(_ item: TDItem, from list: TDItemList) {
         var listItems = rawModel.associations[list.identifier] ?? []
         listItems.remove(item.identifier)
         rawModel.associations[list.identifier] = listItems
         try? saveModel()
         notify { $0.storage(self, removedItem: item, from: list) }
     }
-    
     
 }

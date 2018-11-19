@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import TodoKit
 
 class AppCoordinator: Coordinator {
     
@@ -20,9 +21,7 @@ class AppCoordinator: Coordinator {
     var listCoordinator: TDItemListOverviewCoordinator?
     
     init() {
-        let documentsFolder = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-        let storageFile = documentsFolder.appendingPathComponent("todos.json")
-        storage = TDStorage(location: storageFile)
+        storage = TDStorage.shared()!
     }
     
     func start(with launchOptions: Dictionary<UIApplication.LaunchOptionsKey, Any>) -> Bool {

@@ -8,11 +8,11 @@
 
 import Foundation
 
-struct TDStorageModel: Codable {
+public struct TDStorageModel: Codable {
     
-    var lists: Set<TDItemList>
-    var items: Set<TDItem>
-    var associations: Dictionary<Identifier<TDItemList>, Set<Identifier<TDItem>>>
+    public var lists: Set<TDItemList>
+    public var items: Set<TDItem>
+    public var associations: Dictionary<Identifier<TDItemList>, Set<Identifier<TDItem>>>
     
     init() {
         lists = []
